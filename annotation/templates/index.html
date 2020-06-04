@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/materialize.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="../static/js/jquery-3.5.1.min.js"></script>
+    <script src="../static/js/materialize.js"></script>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="../static/js/viewer.js"></script>
+    <title>Image SS Annotation</title>
+</head>
+<body>
+    <div class="content">
+        <div class="left-bar z-depth-1">
+            <div id="mask-images" class="z-depth-1">
+                <div class="z-depth-1" id="label-name-form">
+                    <input id="label-name-text" type="text" placeholder="label name" pattern="^[a-z|A-Z]+[a-z|A-Z|0-9]*$">
+                    <button id="add-label" class="btn">Add</button>
+                </div>
+                {% for name in label_name %}
+                <div class="card z-depth-1">
+                    <div class="card-image z-depth-1">
+                        <img alt={{ name }} id={{ name }}>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-title">{{ name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="main-canvas z-depth-1">
+            <img id="src-img" src={{ img_path }} alt="NoImage">
+            <canvas id="mask-canvas"></canvas>
+        </div>
+        <div class="right-bar z-depth-1">
+            <div class="rb z-depth-1">
+                <h2 for="id-input">Image id in safebooru</h2>
+                <div class="id-input" id="id-input">
+                    <input type="number" id="image-id" name="image-id" value={{ img_id }}>
+                    <input type="button" id="get-img" class="btn" value="Get Image">
+                </div>
+                <div class="file-field input-field">
+                    <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text">
+                    </div>
+                    <div class="btn">
+                        <span>FILE</span>
+                        <input type="file" accept="image/*" id="local-file">
+                    </div>
+                </div>
+            </div>
+            <div class="rb z-depth-1">
+                <h2 for="alpha-slider">Transparent Rate</h2>
+                <input id="alpha-slider" type="range" min="0.0" max="1.0" step="0.01" value="0.4">
+            </div>
+            <div class="tool-box">
+                <div class="draw-mode z-depth-1">
+                    <h2>Draw Mode</h2>
+                    <label id="fg"><input type="radio" class="with-gap" name="mode" value="#FF0000" checked><span>FG</span></label>
+                    <label id="bg"><input type="radio" class="with-gap"  name="mode" value="#0000FF"><span>BG</span></label>
+                    <label id="pfg"><input type="radio" class="with-gap"  name="mode" value="#FF7F50"><span>PFG</span></label>
+                    <label id="pbg"><input type="radio" class="with-gap"  name="mode" value="#00FFFF"><span>PBG</span></label>
+                    <label id="erase"><input type="radio" name="mode" value="#FFFFFF"><span>ERASE</span></label>
+                    <h3 id="draw-size">Size : </h3>
+                    <input id="draw-size" type="number" value="50" min="1" max="300" step="10">
+                </div>
+                <input type="button" name="grabcut" id="grabcut" class="btn" value="GrabCut">
+                <span id="img-setter">
+                    <input type="button" name="set-img" id="set-img" class="btn" value="Set to">
+                    <select name="l-name" id="l-name">
+                        {% for name in label_name %}
+                            <option value={{ name }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </span>
+                <input type="button" name="clear-canvas" id="clear-canvas" class="btn" value="Clear">
+            </div>
+            <input type="button" id="save-drive" class="btn" value="Save to Google Drive">
+            <input type="button" id="download-data" class="btn" value="Download">
+        </div>
+    </div>
+</body>
+</html>
