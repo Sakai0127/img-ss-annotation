@@ -3,5 +3,6 @@ flask_app
 __pycache__
 /*.png
 test.py
+secrets.py
 client_secret.json
 flask_secret.json
