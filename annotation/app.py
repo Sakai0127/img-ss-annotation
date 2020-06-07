@@ -102,6 +102,7 @@ def grabcut():
 @g_oauth.required(scopes=['https://www.googleapis.com/auth/drive.file'])
 def upload():
     post_data = request.json
+    print(post_data)
     drive = build('drive', 'v3', http=g_oauth.http())
     if 'save_dir_id' in session:
         dir_id = session['save_dir_id']
