@@ -28,7 +28,7 @@ except FileNotFoundError:
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.urandom(24)
+app.config['SECRET_KEY'] = 'seacret'
 app.config['GOOGLE_OAUTH2_CLIENT_ID'] = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID', None)
 app.config['GOOGLE_OAUTH2_CLIENT_SECRET'] = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET', None)
 
@@ -102,7 +102,6 @@ def grabcut():
 @g_oauth.required(scopes=['https://www.googleapis.com/auth/drive.file'])
 def upload():
     post_data = request.json
-    print(post_data)
     drive = build('drive', 'v3', http=g_oauth.http())
     if 'save_dir_id' in session:
         dir_id = session['save_dir_id']
@@ -138,4 +137,4 @@ def download():
     return send_file(buffer, as_attachment=True, attachment_filename=post_data['name']+'.pkl')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=8000, debug=True)
