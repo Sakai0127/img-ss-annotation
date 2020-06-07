@@ -38,13 +38,6 @@ function get_color (str) {
     return [parseInt(str.substr(1, 2), 16), parseInt(str.substr(3, 2), 16), parseInt(str.substr(5, 2), 16)];
 };
 
-function enable_drive() {
-    var link = document.createElement("a");
-    link.href = "/g-oauth";
-    link.target = "_blank";
-    link.click();
-}
-
 $(function(){
     src_img = $("#src-img");
     main_canvas = $("#mask-canvas");
@@ -230,7 +223,7 @@ $(function(){
                     login_link.click();
                     $("#save-drive").attr("value", "Save to Google Drive");
                 } else {
-                    $(this).attr("value", "Saving...");
+                    $("input#save-drive").attr("value", "Saving...");
                     var img_elems = $(".card-image>img");
                     var imgs = {};
                     for ( var i = 0; i < img_elems.length; i++){
@@ -247,7 +240,7 @@ $(function(){
                         data: JSON.stringify(send_data),
                         dataType: "json",
                         success: function (response) {
-                            $("#save-drive").attr("value", "Save to Google Drive");
+                            $("input#save-drive").attr("value", "Save to Google Drive");
                         }
                     });
                 }
