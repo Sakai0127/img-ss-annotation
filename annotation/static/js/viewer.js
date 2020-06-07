@@ -38,6 +38,13 @@ function get_color (str) {
     return [parseInt(str.substr(1, 2), 16), parseInt(str.substr(3, 2), 16), parseInt(str.substr(5, 2), 16)];
 };
 
+function enable_drive() {
+    var link = document.createElement("a");
+    link.href = "/g-oauth";
+    link.target = "_blank";
+    link.click();
+}
+
 $(function(){
     src_img = $("#src-img");
     main_canvas = $("#mask-canvas");
@@ -77,10 +84,10 @@ $(function(){
         safebooru = false;
         var reader = new FileReader();
         reader.onload = function(event){
-            file_name = $("#local-file")[0].files[0].name.split('.')[0]
-            src_img.attr('src', event.target.result)
+            file_name = $("#local-file")[0].files[0].name.split('.')[0];
+            src_img.attr('src', event.target.result);
         };
-        reader.readAsDataURL(event.target.files[0])
+        reader.readAsDataURL(event.target.files[0]);
     });
 
     $("#alpha-slider").on("input", function( event ) {
@@ -213,27 +220,39 @@ $(function(){
     });
 
     $("input#save-drive").on("click", function(){
-        $(this).attr("value", "Saving...");
-        var img_elems = $(".card-image>img");
-        var imgs = {};
-        for ( var i = 0; i < img_elems.length; i++){
-            imgs[img_elems[i].id] = toBase64(img_elems[i]);
-        };
-
-        var send_data = {'name':file_name,
-                         'safebooru':safebooru,
-                         'imgs':imgs,
-                         'colors':color_list};
-        $.ajax({
-            type: "POST",
-            url: "/upload-google-drive",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify(send_data),
-            dataType: "json",
-            success: function (response) {
-                $("#save-drive").attr("value", "Save to Google Drive");
+        $.get("/get-login-status",
+            function (data, textStatus, jqXHR) {
+                var status = data.status;
+                if (!status) {
+                    var login_link = document.createElement("a");
+                    login_link.href = "/g-oauth";
+                    login_link.target = "_blank";
+                    login_link.click();
+                    $("#save-drive").attr("value", "Save to Google Drive");
+                } else {
+                    $(this).attr("value", "Saving...");
+                    var img_elems = $(".card-image>img");
+                    var imgs = {};
+                    for ( var i = 0; i < img_elems.length; i++){
+                        imgs[img_elems[i].id] = toBase64(img_elems[i]);
+                    };
+                    var send_data = {'name':file_name,
+                                    'safebooru':safebooru,
+                                    'imgs':imgs,
+                                    'colors':color_list};
+                    $.ajax({
+                        type: "POST",
+                        url: "/upload-google-drive",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(send_data),
+                        dataType: "json",
+                        success: function (response) {
+                            $("#save-drive").attr("value", "Save to Google Drive");
+                        }
+                    });
+                }
             }
-        });
+        );
     });
 
     $("input#download-data").on("click", function(){
@@ -257,11 +276,11 @@ $(function(){
             var link = document.createElement("a");
             link.download = send_data["name"]+".pkl";
             link.href = URL.createObjectURL(blob);
-            link.click()
-            URL.revokeObjectURL(link.href)
+            link.click();
+            URL.revokeObjectURL(link.href);
+            $("input#download-data").attr("value", "Download");
         };
         xhr.send(JSON.stringify(send_data));
-        $(this).attr("value", "Download");
     });
 
     $("#add-label").on("click", function(){

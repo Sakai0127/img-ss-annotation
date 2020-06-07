@@ -3,6 +3,7 @@ from io import BytesIO
 import json
 import os
 import pickle
+import webbrowser
 import xml.etree.ElementTree as ET
 
 import cv2
@@ -17,7 +18,7 @@ import requests
 BASE_URL = 'https://safebooru.org/index.php?page=dapi&s=post&q=index'
 SAVE_DIR_NAME ='SS-annotation'
 with open('annotation/static/label-name.json', 'r') as f:
-    LABEL_NAME = json.load(f)['labels']
+    LABEL_NAMES = json.load(f)['labels']
 try:
     with open('annotation/client_secret.json', 'rb') as f:
         secrets = json.load(f)
@@ -28,7 +29,7 @@ except FileNotFoundError:
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = 'seacret'
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['GOOGLE_OAUTH2_CLIENT_ID'] = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID', None)
 app.config['GOOGLE_OAUTH2_CLIENT_SECRET'] = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET', None)
 
@@ -53,7 +54,7 @@ def get_savedata(post_data):
 
 @app.route('/')
 def index():
-    return render_template('index.html', img_path='static/images/no-img.png', label_name=LABEL_NAME, img_id=3090260)
+    return render_template('index.html', img_path='static/images/no-img.png', label_name=LABEL_NAMES, img_id=3090260, status=(not g_oauth.has_credentials()))
 
 @app.route('/get-img', methods=['POST'])
 def get_img():
@@ -98,15 +99,26 @@ def grabcut():
     )
     return jsonify(ResultSet=json.dumps(result_data))
 
-@app.route('/upload-google-drive', methods=['POST'])
+@app.route('/get-login-status')
+def get_status():
+    return jsonify(status=g_oauth.has_credentials())
+
+@app.route('/g-oauth')
 @g_oauth.required(scopes=['https://www.googleapis.com/auth/drive.file'])
+def login():
+    return 'Autholize Success. Close this tab.'
+
+@app.route('/upload-google-drive', methods=['POST'])
+#@g_oauth.required(scopes=['https://www.googleapis.com/auth/drive.file'])
 def upload():
+    if not g_oauth.has_credentials():
+        return jsonify(result=json.dumps({'state':False}))
     post_data = request.json
     drive = build('drive', 'v3', http=g_oauth.http())
     if 'save_dir_id' in session:
         dir_id = session['save_dir_id']
     else:
-        folder = drive.files().list(q='name = \'%s\' and mimeType = \'application/vnd.google-apps.folder\''%(SAVE_DIR_NAME)).execute()
+        folder = drive.files().list(q='name = \'%s\' and mimeType = \'application/vnd.google-apps.folder\' and trashed = false'%(SAVE_DIR_NAME)).execute()
         folder = folder.get('files', [])
         if folder:
             folder = folder[0]
@@ -126,7 +138,7 @@ def upload():
         'parents':[dir_id],
     }
     res = drive.files().create(body=meta_data, media_body=up_file, fields='id').execute()
-    return jsonify(result=json.dumps({'r':'success'}))
+    return jsonify(result=json.dumps({'state':True}))
 
 @app.route('/download', methods=['POST'])
 def download():

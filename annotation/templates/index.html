@@ -78,7 +78,11 @@
                 </span>
                 <input type="button" name="clear-canvas" id="clear-canvas" class="btn" value="Clear">
             </div>
-            <input type="button" id="save-drive" class="btn" value="Save to Google Drive">
+            {% if status %}
+                <input type="button" id="save-drive" class="btn" value="Login Google Drive">
+            {% else %}
+                <input type="button" id="save-drive" class="btn" value="Save to Google Drive">
+            {% endif %}
             <input type="button" id="download-data" class="btn" value="Download">
         </div>
     </div>
