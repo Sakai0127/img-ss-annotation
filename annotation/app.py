@@ -28,12 +28,11 @@ except FileNotFoundError:
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET', None)
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config['GOOGLE_OAUTH2_CLIENT_ID'] = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID', None)
 app.config['GOOGLE_OAUTH2_CLIENT_SECRET'] = os.environ.get('GOOGLE_OAUTH2_CLIENT_SECRET', None)
 
 g_oauth = flask_util.UserOAuth2(app)
-print(app.config)
 
 def get_savedata(post_data):
     data = {}
